@@ -109,7 +109,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.BLUE + "-----------------");
                 sender.sendMessage(ChatColor.GOLD + "/dueling info");
                 sender.sendMessage(ChatColor.GOLD + "/dueling help");
-                sender.sendMessage(ChatColor.GOLD + "/dueling join");
                 if (sender.hasPermission("dueling.admin")) {
                     sender.sendMessage(ChatColor.GOLD + "/dueling admin");
                 }
@@ -132,9 +131,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                         sender.sendMessage(ChatColor.GOLD + "/dueling admin");
                     }
                     sender.sendMessage(ChatColor.BLUE + "-----------------");
-                }
-                if (args[0].equalsIgnoreCase("join")) {
-                    //teleport them to a certain place.
                 }
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (sender.hasPermission("dueling.admin")) {
@@ -190,7 +186,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("players", list);
                                 saveConfig();
                                 reloadConfig();
-                                p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby,setspawn,setspec,settreasureroom !");
+                                p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
                             } else {
                                 sender.sendMessage(ChatColor.AQUA + "Arena already exists!");
                             }
@@ -262,6 +258,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                             arena.set("lobbystate",true);
                                                             for (String queued : queue.keySet()){
                                                                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + queue.get(queued) + " " + queued);
+                                                                queue.remove(queued);
                                                             }
                                                         }
                                                     },20);
