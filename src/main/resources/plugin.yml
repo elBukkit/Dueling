@@ -1,9 +1,9 @@
-name: HPDueling
+name: Dueling
 version: 0.1
 author: KmanCrazy
-main: me.KmanCrazy.dueling.Main
+main: me.KmanCrazy.dueling.DuelingPlugin
 commands:
    dueling:
-     description: Duel with a friend or an enemy or a group!
+     description: Duel with a friend or an enemy or a group
    options:
-     description: Set the options of an arena!
+     description: Set the options of an arena

@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Main extends JavaPlugin implements Listener {
+public class DuelingPlugin extends JavaPlugin implements Listener {
     public Map<String,String> queue = new HashMap<String,String>();
     public int b = 20*10;
 
