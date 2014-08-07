@@ -354,14 +354,14 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                 }
                                             }
                                         } else {
-                                            sender.sendMessage(ChatColor.AQUA + "That game is already in game!");
+                                            //sender.sendMessage(ChatColor.AQUA + "That game is already in game!");
                                             Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "That game is already in game!");
                                             Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have been added into the queue");
                                             queue.put(args[3],args[2]);
                                         }
 
                                     } else {
-                                        sender.sendMessage(ChatColor.AQUA + "Already in game!");
+                                        //sender.sendMessage(ChatColor.AQUA + "Already in game!");
                                         Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "Already in game!");
                                     }
 
