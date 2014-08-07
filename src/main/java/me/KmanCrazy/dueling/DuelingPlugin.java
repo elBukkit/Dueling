@@ -245,9 +245,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                             if (arena.getStringList("players").size() == 1) {
                                                 for (String s : arena.getStringList("players")) {
 
-                                                    for (String queued : queue.keySet()){
-                                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + queue.get(queued) + " " + queued);
-                                                    }
+
 
                                                     Bukkit.getPlayer(s).teleport(treasureroom);
                                                     Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations! Enjoy the treasure!");
@@ -262,6 +260,9 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                         public void run() {
                                                             ConfigurationSection arena = getConfig().getConfigurationSection(ar);
                                                             arena.set("lobbystate",true);
+                                                            for (String queued : queue.keySet()){
+                                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + queue.get(queued) + " " + queued);
+                                                            }
                                                         }
                                                     },20);
                                                 }
