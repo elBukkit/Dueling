@@ -348,7 +348,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                     }
                                                 }else{
                                                     Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "There are too many players! Wait until next round!");
-                                                    sender.sendMessage("Too many players!");
+                                                    // sender.sendMessage("Too many players!");
                                                     Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have been added into the queue");
                                                     queue.put(args[3],args[2]);
                                                 }
