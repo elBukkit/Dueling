@@ -1,0 +1,5 @@
+name: Dueling
+main: me.KmanCrazy.dueling.Main
+version: ${project.version}
+author: KManCrazy
+description : A plugin to handle dueling and arenas
