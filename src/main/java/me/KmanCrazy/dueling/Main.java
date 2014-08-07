@@ -1,6 +1,5 @@
 package me.KmanCrazy.dueling;
 
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,10 +20,12 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main extends JavaPlugin implements Listener {
-    public List<String> que = new ArrayList<String>();
+    public Map<String,String> queue = new HashMap<String,String>();
     public int b = 20*10;
 
     @Override
@@ -93,7 +94,6 @@ public class Main extends JavaPlugin implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (clickedBlock.getType() == Material.SIGN || clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN)) {
             Sign sign = (Sign) e.getClickedBlock().getState();
             if (sign.getLine(0).contains("Duel")){
-                Bukkit.broadcastMessage(ChatColor.AQUA + e.getPlayer().getName() + " has joined the queue for "+ sign.getLine(1));
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + sign.getLine(1) + " " + e.getPlayer().getName());
                 e.getPlayer().setHealth(20.0);
             }
@@ -183,6 +183,7 @@ public class Main extends JavaPlugin implements Listener {
                                 arena.set("spec.y", p.getLocation().getY());
                                 arena.set("spec.z", p.getLocation().getZ());
                                 arena.set("spec.world", p.getLocation().getWorld().getName());
+                                arena.set("maxplayers", 6);
                                 arena.set("minplayers", 2);
                                 arena.set("lobbystate", true);
                                 List<String> list = new ArrayList<String>();
@@ -205,7 +206,7 @@ public class Main extends JavaPlugin implements Listener {
                         if (getConfig().getConfigurationSection(args[2]) != null) {
                             final String ar = args[2];
                             ConfigurationSection arena = getConfig().getConfigurationSection(args[2]);
-                            if (arena.getStringList("players").size() >= 2) {
+                            if (arena.getStringList("players").size() >= arena.getInt("minplayers")) {
                                 Location lobby = new Location(Bukkit.getWorld(arena.getString("lobby.world")), arena.getInt("lobby.x"), arena.getInt("lobby.y"), arena.getInt("lobby.z"));
                                 final Location spawn = new Location(Bukkit.getWorld(arena.getString("spawn.world")), arena.getInt("spawn.x"), arena.getInt("spawn.y"), arena.getInt("spawn.z"));
                                 final Location treasureroom = new Location(Bukkit.getWorld(arena.getString("treasureroom.world")), arena.getInt("treasureroom.x"), arena.getInt("treasureroom.y"), arena.getInt("treasureroom.z"));
@@ -218,7 +219,7 @@ public class Main extends JavaPlugin implements Listener {
                                     public void run() {
                                         ConfigurationSection arena = getConfig().getConfigurationSection(ar);
                                         if (arena.getBoolean("lobbystate") == true) {
-                                            if (arena.getStringList("players").size() >= arena.getInt("minplayers")) {
+                                            if (arena.getStringList("players").size() >= arena.getInt("minplayers") ) {
                                                 //start stuff;
                                                 for (String s : arena.getStringList("players")) {
                                                     Bukkit.getPlayer(s).sendMessage("Begin!");
@@ -244,15 +245,16 @@ public class Main extends JavaPlugin implements Listener {
                                             if (arena.getStringList("players").size() == 1) {
                                                 for (String s : arena.getStringList("players")) {
 
+                                                    for (String queued : queue.keySet()){
+                                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + queue.get(queued) + " " + queued);
+                                                    }
+
                                                     Bukkit.getPlayer(s).teleport(treasureroom);
                                                     Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations! Enjoy the treasure!");
                                                     Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a duel!");
                                                     List<String> list = new ArrayList<String>();
                                                     b = 20*10;
-                                                    getLogger().info("Before");
                                                     arena.set("players", list);
-
-                                                    getLogger().info("after");
                                                     saveConfig();
                                                     reloadConfig();
                                                     Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
@@ -322,30 +324,40 @@ public class Main extends JavaPlugin implements Listener {
                                     if (!arena.getStringList("players").contains(args[3])) {
                                         if (arena.getBoolean("lobbystate") == true) {
                                             if (!arena.getStringList("players").contains(args[3])) {
-                                                final Location lobby = new Location(Bukkit.getWorld(arena.getString("lobby.world")), arena.getInt("lobby.x"), arena.getInt("lobby.y"), arena.getInt("lobby.z"));
-                                                final Location spawn = new Location(Bukkit.getWorld(arena.getString("spawn.world")), arena.getInt("spawn.x"), arena.getInt("spawn.y"), arena.getInt("spawn.z"));
-                                                final Location treasureroom = new Location(Bukkit.getWorld(arena.getString("treasureroom.world")), arena.getInt("treasureroom.x"), arena.getInt("treasureroom.y"), arena.getInt("treasureroom.z"));
-                                                final Location specroom = new Location(Bukkit.getWorld(arena.getString("spec.world")), arena.getInt("spec.x"), arena.getInt("spec.y"), arena.getInt("spec.z"));
-                                                Bukkit.getPlayer(args[3]).teleport(lobby);
-                                                List<String> list = arena.getStringList("players");
-                                                list.add(args[3]);
+                                                if (arena.getStringList("players").size() <= arena.getInt("maxplayers")) {
+                                                    final Location lobby = new Location(Bukkit.getWorld(arena.getString("lobby.world")), arena.getInt("lobby.x"), arena.getInt("lobby.y"), arena.getInt("lobby.z"));
+                                                    final Location spawn = new Location(Bukkit.getWorld(arena.getString("spawn.world")), arena.getInt("spawn.x"), arena.getInt("spawn.y"), arena.getInt("spawn.z"));
+                                                    final Location treasureroom = new Location(Bukkit.getWorld(arena.getString("treasureroom.world")), arena.getInt("treasureroom.x"), arena.getInt("treasureroom.y"), arena.getInt("treasureroom.z"));
+                                                    final Location specroom = new Location(Bukkit.getWorld(arena.getString("spec.world")), arena.getInt("spec.x"), arena.getInt("spec.y"), arena.getInt("spec.z"));
+                                                    Bukkit.getPlayer(args[3]).teleport(lobby);
+                                                    List<String> list = arena.getStringList("players");
+                                                    list.add(args[3]);
+                                                    Bukkit.broadcastMessage(ChatColor.AQUA + args[3] + " has joined the queue for " + args[2]);
+                                                    arena.set("players", list);
+                                                    saveConfig();
+                                                    reloadConfig();
+                                                    Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have joined the game!");
+                                                    final String ar = args[2];
+                                                    if (arena.getBoolean("lobbystate") == true) {
+                                                        if (arena.getStringList("players").size() >= arena.getInt("minplayers")) {
 
-                                                arena.set("players", list);
-                                                saveConfig();
-                                                reloadConfig();
-                                                Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have joined the game!");
-                                                final String ar = args[2];
-                                                if (arena.getBoolean("lobbystate") == true) {
-                                                    if (arena.getStringList("players").size() >= arena.getInt("minplayers")) {
+                                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin start " + ar);
 
-                                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin start " + ar);
 
+                                                        }
                                                     }
+                                                }else{
+                                                    Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "There are too many players! Wait until next round!");
+                                                    sender.sendMessage("Too many players!");
+                                                    Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have been added into the queue");
+                                                    queue.put(args[3],args[2]);
                                                 }
                                             }
                                         } else {
                                             sender.sendMessage(ChatColor.AQUA + "That game is already in game!");
                                             Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "That game is already in game!");
+                                            Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have been added into the queue");
+                                            queue.put(args[3],args[2]);
                                         }
 
                                     } else {
