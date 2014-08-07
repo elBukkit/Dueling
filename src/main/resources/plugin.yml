@@ -1,5 +1,9 @@
-name: Dueling
+name: HPDueling
+version: 0.1
+author: KmanCrazy
 main: me.KmanCrazy.dueling.Main
-version: ${project.version}
-author: KManCrazy
-description : A plugin to handle dueling and arenas
+commands:
+   dueling:
+     description: Duel with a friend or an enemy or a group!
+   options:
+     description: Set the options of an arena!
