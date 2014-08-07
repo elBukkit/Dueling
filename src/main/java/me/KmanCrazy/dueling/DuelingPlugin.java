@@ -393,33 +393,52 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("lobby.z", p.getLocation().getZ());
                                 arena.set("lobby.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
-
-
+                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
                             } else if (args[0].equalsIgnoreCase("setspawn")) {
                                 arena.set("spawn.x", p.getLocation().getX());
                                 arena.set("spawn.y", p.getLocation().getY());
                                 arena.set("spawn.z", p.getLocation().getZ());
                                 arena.set("spawn.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
+                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
                             } else if (args[0].equalsIgnoreCase("setspec")) {
                                 arena.set("spec.x", p.getLocation().getX());
                                 arena.set("spec.y", p.getLocation().getY());
                                 arena.set("spec.z", p.getLocation().getZ());
                                 arena.set("spec.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
+                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
                             } else if (args[0].equalsIgnoreCase("settreasureroom")) {
                                 arena.set("treasureroom.x", p.getLocation().getX());
                                 arena.set("treasureroom.y", p.getLocation().getY());
                                 arena.set("treasureroom.z", p.getLocation().getZ());
                                 arena.set("treasureroom.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
+                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
 
-                            } else {
+                            }else if (args[0].equalsIgnoreCase("setminplayers")){
+                                p.sendMessage(ChatColor.DARK_RED + "You must specify a number of minimum players!");
+
+                            }
+                            else if (args[0].equalsIgnoreCase("setmaxplayers")){
+                                p.sendMessage(ChatColor.DARK_RED + "You must specify a number of maximum players!");
+                            }else {
                                 sender.sendMessage(ChatColor.AQUA + "Unknown option!");
                             }
                         }
 
-                    } else {
+                    }else if (args.length == 3){
+                        if (getConfig().getConfigurationSection(args[1]) != null) {
+                            ConfigurationSection arena = getConfig().getConfigurationSection(args[1]);
+                            if (args[0].equalsIgnoreCase("setminplayers")) {
+                                arena.set("minplayers",args[2]);
+                            } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
+                                arena.set("maxplayers",args[2]);
+                            }
+                        }else{
+                            p.sendMessage(ChatColor.RED + "ERROR!");
+                        }
+                    }else {
                         sender.sendMessage(ChatColor.RED + "Error!");
                     }
                 }
