@@ -30,6 +30,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     public Map<String,String> queue = new HashMap<String,String>();
     public Map<String,String> dead = new HashMap<String, String>();
     public int b = 20*10;
+    public boolean tester  = false;
 
     @Override
     public void onEnable() {
@@ -297,32 +298,40 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                     @Override
                                     public void run() {
                                         ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+
                                         if (arena.getBoolean("lobbystate") == false) {
                                             if (arena.getStringList("players").size() == 1) {
-                                                for (String s : arena.getStringList("players")) {
-
-
-
-                                                    Bukkit.getPlayer(s).teleport(treasureroom);
-                                                    Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations! Enjoy the treasure!");
-                                                    Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a battle!");
-                                                    List<String> list = new ArrayList<String>();
-                                                    b = 20*10;
-                                                    arena.set("players", list);
-                                                    saveConfig();
-                                                    reloadConfig();
-                                                    Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+                                                Bukkit.getScheduler().runTaskLater(DuelingPlugin.this, new Runnable() {
                                                         @Override
                                                         public void run() {
+
                                                             ConfigurationSection arena = getConfig().getConfigurationSection(ar);
-                                                            arena.set("lobbystate",true);
-                                                            for (String queued : queue.keySet()){
-                                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + queue.get(queued) + " " + queued);
-                                                                queue.remove(queued);
+                                                            for (String s : arena.getStringList("players")) {
+
+                                                                Bukkit.getPlayer(s).teleport(treasureroom);
+                                                                Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations! Enjoy the treasure!");
+                                                                Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a battle!");
+                                                                List<String> list = new ArrayList<String>();
+                                                                b = 20 * 10;
+                                                                arena.set("players", list);
+                                                                saveConfig();
+                                                                reloadConfig();
+                                                                Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                                        arena.set("lobbystate", true);
+                                                                        for (String queued : queue.keySet()) {
+                                                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin join " + queue.get(queued) + " " + queued);
+                                                                            queue.remove(queued);
+                                                                        }
+                                                                    }
+                                                                }, 20);
                                                             }
                                                         }
-                                                    },20);
-                                                }
+                                                    }, 20 * 5);
+
+
                                             }
                                         }
                                     }
