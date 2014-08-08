@@ -16,6 +16,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,6 +27,7 @@ import java.util.Map;
 
 public class DuelingPlugin extends JavaPlugin implements Listener {
     public Map<String,String> queue = new HashMap<String,String>();
+    public Map<String,String> dead = new HashMap<String, String>();
     public int b = 20*10;
 
     @Override
@@ -49,6 +51,17 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 List<String> list = new ArrayList<String>();
                 getConfig().getConfigurationSection(s).set("players", list);
                 getConfig().getConfigurationSection(s).set("lobbystate", true);
+            }
+        }
+    }
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent e){
+        for (String s : dead.keySet()){
+            if (e.getPlayer().getName().equals(s)){
+                ConfigurationSection arena = getConfig().getConfigurationSection(dead.get(s));
+                 Location specroom = new Location(Bukkit.getWorld(arena.getString("spec.world")), arena.getInt("spec.x"), arena.getInt("spec.y"), arena.getInt("spec.z"));
+                e.getPlayer().teleport(specroom);
+                e.getPlayer().sendMessage(ChatColor.AQUA + "You have lost :( Better luck next time!");
             }
         }
     }
@@ -216,14 +229,60 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                         ConfigurationSection arena = getConfig().getConfigurationSection(ar);
                                         if (arena.getBoolean("lobbystate") == true) {
                                             if (arena.getStringList("players").size() >= arena.getInt("minplayers") ) {
-                                                //start stuff;
-                                                for (String s : arena.getStringList("players")) {
-                                                    Bukkit.getPlayer(s).sendMessage("Begin!");
-                                                    Bukkit.getPlayer(s).teleport(spawn);
+                                                for (String s : arena.getStringList("players")){
+                                                    Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Game starting in 5 seconds!");
                                                 }
-                                                arena.set("lobbystate", false);
-                                                saveConfig();
-                                                reloadConfig();
+                                                //start stuff;
+
+                                                Bukkit.getScheduler().runTaskLater(DuelingPlugin.this,new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                        for (String s : arena.getStringList("players")){
+                                                            Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Game starting in 4 seconds!");
+                                                        }
+                                                        Bukkit.getScheduler().runTaskLater(DuelingPlugin.this,new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                                for (String s : arena.getStringList("players")){
+                                                                    Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Game starting in 3 seconds!");
+                                                                }
+                                                                Bukkit.getScheduler().runTaskLater(DuelingPlugin.this,new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                                        for (String s : arena.getStringList("players")){
+                                                                            Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Game starting in 2 seconds!");
+                                                                        }
+                                                                        Bukkit.getScheduler().runTaskLater(DuelingPlugin.this,new Runnable() {
+                                                                            @Override
+                                                                            public void run() {
+                                                                                ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                                                for (String s : arena.getStringList("players")){
+                                                                                    Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Game starting in 1 seconds!");
+                                                                                }
+                                                                                Bukkit.getScheduler().runTaskLater(DuelingPlugin.this,new Runnable() {
+                                                                                    @Override
+                                                                                    public void run() {
+                                                                                        ConfigurationSection arena = getConfig().getConfigurationSection(ar);
+                                                                                        for (String s : arena.getStringList("players")) {
+                                                                                            Bukkit.getPlayer(s).sendMessage("Begin!");
+                                                                                            Bukkit.getPlayer(s).teleport(spawn);
+                                                                                        }
+                                                                                        arena.set("lobbystate", false);
+                                                                                        saveConfig();
+                                                                                        reloadConfig();
+                                                                                    }
+                                                                                },20);
+                                                                            }
+                                                                        },20);
+                                                                    }
+                                                                },20);
+                                                            }
+                                                        },20);
+                                                    }
+                                                },20);
 
 
                                             }
@@ -231,7 +290,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                     }
 
 
-                                }, b);
+                                }, 20*5);
 
                                 Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
                                     @Override
@@ -282,13 +341,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                     arena.set("players", list);
                                                     saveConfig();
                                                     reloadConfig();
-                                                    Bukkit.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            Bukkit.getPlayer(st).sendMessage(ChatColor.AQUA + "You have lost :( Better luck next time!");
-                                                            Bukkit.getPlayer(st).teleport(specroom);
-                                                        }
-                                                    }, 20 * 5);
                                                 }
                                             }
 
