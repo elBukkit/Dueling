@@ -3,7 +3,7 @@ Here are the usages if they come unclear.
 Creating an arena:
 1. Create an arena name.
 2. Stand where you want the spawn to be. (Can be changed later but it is easier if you just do it now.)
-3. Create the arena by doing /dueling admin create <arena name>
+3. Create the arena by doing /dueling admin create <arena name> (arena type, ffa, spleef, 1v1, 2v2, 3v3)
 4. Once you have created the arena you can now set the options.
 5. Set the lobby where you are standing by /options setlobby <arena name>
 6. Set the spawn where you are standing by /options setspawn <arena name>
