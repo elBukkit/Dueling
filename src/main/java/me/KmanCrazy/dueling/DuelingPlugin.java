@@ -303,16 +303,18 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                     Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations!");
                                                     Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a battle!");
 
+                                                    List<String> list = new ArrayList<String>();
+                                                    b = 20 * 10;
+                                                    arena.set("players", list);
+                                                    saveConfig();
+                                                    reloadConfig();
+
                                                     Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
                                                         @Override
                                                         public void run() {
                                                             Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "Enjoy the treasure!");
                                                             Bukkit.getPlayer(s).teleport(treasureroom);
-                                                            List<String> list = new ArrayList<String>();
-                                                            b = 20 * 10;
-                                                            arena.set("players", list);
-                                                            saveConfig();
-                                                            reloadConfig();
+
                                                             Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
                                                                 @Override
                                                                 public void run() {
