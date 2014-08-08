@@ -11,13 +11,14 @@ Creating an arena:
 8. Set the treasure room where you are standing by /options settreasureroom <arena name>
 9. Set the minimum amount of players to start the arena by /options setminplayers <arena name> <int ammount> (Default:2)
 10. Set the max amount of players that can join the arena by /options setmaxplayers <arena name> <int ammount> (Default:6)
-11. Congratulations you have created your first arena!
-12. To have players join this arena create a sign.
-13. The sign should look like this:
+11. Set the type of arena by /options settype <arena name> <type> (arena type, ffa, spleef, 1v1, 2v2, 3v3)
+12. Congratulations you have created your first arena!
+13. To have players join this arena create a sign.
+14. The sign should look like this:
                Duel
                <Arena name>
-14. Then it will 'auto form' the sign and allow players to join when they right click.
-15. Remember more is to come so there will be things that will have to be updated!
-16. Have any problems? Call KmanCrazy! Skype: KmanCrazy
+15. Then it will 'auto form' the sign and allow players to join when they right click.
+16. Remember more is to come so there will be things that will have to be updated!
+17. Have any problems? Call KmanCrazy! Skype: KmanCrazy
 
 
