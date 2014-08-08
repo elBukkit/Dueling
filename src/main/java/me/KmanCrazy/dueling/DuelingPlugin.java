@@ -19,6 +19,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                  Location specroom = new Location(Bukkit.getWorld(arena.getString("spec.world")), arena.getInt("spec.x"), arena.getInt("spec.y"), arena.getInt("spec.z"));
                 e.getPlayer().teleport(specroom);
                 e.getPlayer().sendMessage(ChatColor.AQUA + "You have lost :( Better luck next time!");
+                dead.remove(e.getPlayer().getName());
             }
         }
     }
@@ -107,8 +109,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (clickedBlock.getType() == Material.SIGN || clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN)) {
             Sign sign = (Sign) e.getClickedBlock().getState();
             if (sign.getLine(0).contains("Duel")){
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"dueling admin join " + sign.getLine(1) + " " + e.getPlayer().getName());
-                e.getPlayer().setHealth(20.0);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin join " + sign.getLine(1) + " " + e.getPlayer().getName());
             }
         }
     }
@@ -154,7 +155,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (args[1].equalsIgnoreCase("create")) {
-                        sender.sendMessage("You must specify an arena!");
+                        sender.sendMessage("You must specify an arena! (Optional: Type) (Normal Type: FFA)");
                     }
                     if (args[1].equalsIgnoreCase("join")) {
                         sender.sendMessage("You must specify a name and a player!");
@@ -192,7 +193,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("spec.y", p.getLocation().getY());
                                 arena.set("spec.z", p.getLocation().getZ());
                                 arena.set("spec.world", p.getLocation().getWorld().getName());
-                                arena.set("maxplayers", 6);
+                                arena.set("maxplayers", 20);
                                 arena.set("minplayers", 2);
                                 arena.set("lobbystate", true);
                                 List<String> list = new ArrayList<String>();
@@ -304,7 +305,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
 
                                                     Bukkit.getPlayer(s).teleport(treasureroom);
                                                     Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "You have won! Congratulations! Enjoy the treasure!");
-                                                    Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a duel!");
+                                                    Bukkit.broadcastMessage(ChatColor.GOLD + s + " has won a battle!");
                                                     List<String> list = new ArrayList<String>();
                                                     b = 20*10;
                                                     arena.set("players", list);
@@ -333,7 +334,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                         if (arena.getBoolean("lobbystate") == false) {
                                             for (String s : arena.getStringList("players")) {
                                                 if (Bukkit.getPlayer(s).isDead()) {
-                                                    final String st = s;
+
+                                                    dead.put(s,ar);
 
                                                     List<String> list = arena.getStringList("players");
                                                     list.remove(s);
@@ -387,6 +389,12 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                     saveConfig();
                                                     reloadConfig();
                                                     Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You have joined the game!");
+                                                    Bukkit.getPlayer(args[3]).setHealth(20.0);
+                                                    Bukkit.getPlayer(args[3]).setFoodLevel(20);
+                                                    Bukkit.getPlayer(args[3]).setFireTicks(0);
+                                                    for ( PotionEffect pt : Bukkit.getPlayer(args[3]).getActivePotionEffects()){
+                                                        Bukkit.getPlayer(args[3]).removePotionEffect(pt.getType());
+                                                    }
                                                     final String ar = args[2];
                                                     if (arena.getBoolean("lobbystate") == true) {
                                                         if (arena.getStringList("players").size() >= arena.getInt("minplayers")) {
@@ -418,6 +426,148 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 } else {
                                     sender.sendMessage(ChatColor.AQUA + "Unknown player!");
                                 }
+                            }
+                        }else if (args[1].equalsIgnoreCase("create")){
+                            if (sender instanceof Player) {
+                                Player p = (Player) sender;
+                                if (getConfig().getConfigurationSection(args[2]) == null) {
+                                    ConfigurationSection arena = getConfig().createSection(args[2]);
+                                    if (args[3].equalsIgnoreCase("FFA")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 20);
+                                        arena.set("minplayers", 2);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }
+                                   else if (args[3].equalsIgnoreCase("1v1")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 2);
+                                        arena.set("minplayers", 2);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }
+                                    else if (args[3].equalsIgnoreCase("2v2")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 4);
+                                        arena.set("minplayers", 4);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }else if (args[3].equalsIgnoreCase("3v3")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 6);
+                                        arena.set("minplayers", 6);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }else if (args[3].equalsIgnoreCase("Spleef")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 15);
+                                        arena.set("minplayers", 5);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }else{
+                                        p.sendMessage(ChatColor.RED + "Unknown arena type please select one of the following: Spleef, FFA, 1v1, 2v2, 3v3");
+                                    }
+
+                                } else {
+                                    sender.sendMessage(ChatColor.AQUA + "Arena already exists!");
+                                }
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "Silly console! Creating arenas are for players!");
                             }
                         }
                     }
@@ -471,6 +621,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                             }
                             else if (args[0].equalsIgnoreCase("setmaxplayers")){
                                 p.sendMessage(ChatColor.DARK_RED + "You must specify a number of maximum players!");
+                            } else if (args[0].equalsIgnoreCase("settype")){
+                                p.sendMessage(ChatColor.DARK_RED + "You must specify an arena type!");
                             }else {
                                 sender.sendMessage(ChatColor.AQUA + "Unknown option!");
                             }
@@ -483,7 +635,37 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("minplayers",args[2]);
                             } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
                                 arena.set("maxplayers",args[2]);
+                                saveConfig();
+                                reloadConfig();
                             }
+                             else  if (args[2].equalsIgnoreCase("FFA")){
+                                arena.set("maxplayers",20);
+                                arena.set("minplayers",2);
+                                saveConfig();
+                                reloadConfig();
+
+                            }else if (args[2].equalsIgnoreCase("1v1")){
+                                arena.set("maxplayers",2);
+                                arena.set("minplayers",2);
+                                saveConfig();
+                                reloadConfig();
+                                }else if (args[2].equalsIgnoreCase("2v2")){
+                                arena.set("maxplayers",4);
+                                arena.set("minplayers",4);
+                                saveConfig();
+                                reloadConfig();
+                                }else if (args[2].equalsIgnoreCase("3v3")){
+                                arena.set("maxplayers",6);
+                                arena.set("minplayers",6);
+                                saveConfig();
+                                reloadConfig();
+                            }else if (args[2].equalsIgnoreCase("Spleef")){
+                                arena.set("maxplayers",15);
+                                arena.set("minplayers",5);
+                                saveConfig();
+                                reloadConfig();
+                            }
+
                         }else{
                             p.sendMessage(ChatColor.RED + "ERROR!");
                         }
