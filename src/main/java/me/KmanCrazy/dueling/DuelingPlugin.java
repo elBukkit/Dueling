@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +19,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -59,6 +62,65 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
 
         Bukkit.getLogger().info("Loaded " + arenas.size() + " arenas");
     }
+    public void spawnFirework(Player p){
+        Firework firework = (Firework) p.getWorld().spawnEntity(p.getLocation(),EntityType.FIREWORK);
+        FireworkMeta fireworkMeta = firework.getFireworkMeta();
+        fireworkMeta.setPower(1);
+        FireworkEffect.Builder effect = FireworkEffect.builder();
+        Random random = new Random();
+        int n  = random.nextInt(4)+1;
+        switch (n){
+            case 1:
+                effect.withColor(Color.BLUE);
+                break;
+            case 2:
+                effect.withColor(Color.GREEN);
+                break;
+            case 3:
+                effect.withColor(Color.RED);
+                break;
+            case 4:
+                effect.withColor(Color.ORANGE);
+                break;
+        }
+        Random rand = new Random();
+        int m  = rand.nextInt(4)+1;
+        switch (m){
+            case 1:
+                effect.withFade(Color.BLACK);
+                break;
+            case 2:
+                effect.withFade(Color.PURPLE);
+                break;
+            case 3:
+                effect.withFade(Color.AQUA);
+                break;
+            case 4:
+                effect.withFade(Color.YELLOW);
+                break;
+        }
+        Random ran = new Random();
+        int o = ran.nextInt(5)+1;
+        switch (o){
+            case 1:
+                effect.with(FireworkEffect.Type.CREEPER);
+                break;
+            case 2:
+                effect.with(FireworkEffect.Type.BALL_LARGE);
+                break;
+            case 3:
+                effect.with(FireworkEffect.Type.BALL);
+                break;
+            case 4:
+                effect.with(FireworkEffect.Type.BURST);
+                break;
+            case 5:
+                effect.with(FireworkEffect.Type.STAR);
+                break;
+        }
+        fireworkMeta.addEffect(effect.build());
+        firework.setFireworkMeta(fireworkMeta);
+    }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
@@ -95,6 +157,10 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
         if (winner != null) {
             Server server = getServer();
             winner.sendMessage(ChatColor.AQUA + "You have won! Congratulations!");
+            winner.setHealth(20.0);
+            winner.setFoodLevel(20);
+            winner.setFireTicks(0);
+            spawnFirework(winner);
             server.broadcastMessage(ChatColor.GOLD + winner.getDisplayName() + " has won a battle!");
             Bukkit.getScheduler().runTaskLater(this, new Runnable() {
                 @Override
@@ -136,7 +202,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 String arenaName = e.getLine(1);
                 Arena arena = arenas.get(arenaName);
                 if (arena != null) {
-                    e.setLine(0,ChatColor.GOLD.toString() + ChatColor.BOLD + "[" + ChatColor.BLUE + "Duel" + ChatColor.GOLD + "]");
+                    e.setLine(0,ChatColor.GOLD + "[" + ChatColor.BLUE + "Duel" + ChatColor.GOLD + "]");
                 } else {
                     e.getBlock().breakNaturally();
                     e.getPlayer().sendMessage(ChatColor.RED + "Unknown arena!");
@@ -257,7 +323,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 sender.sendMessage(ChatColor.AQUA + "Arena not active");
                             }
                         } else {
-                            sender.sendMessage(ChatColor.AQUA + "Unlnown arena");
+                            sender.sendMessage(ChatColor.AQUA + "Unknown arena");
                         }
                     }
                 }
