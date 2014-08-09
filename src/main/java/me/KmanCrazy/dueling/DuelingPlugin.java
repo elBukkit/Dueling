@@ -278,16 +278,9 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (args[1].equalsIgnoreCase("create")) {
                         if (sender instanceof Player) {
-                            Player p = (Player) sender;
-                            String arenaName = args[2];
-                            if (!arenas.containsKey(arenaName)) {
-                                Arena arena = new Arena(this, p.getLocation(), 2, 20);
-                                arenas.put(arenaName, arena);
-                                save();
-                                p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                            } else {
-                                sender.sendMessage(ChatColor.AQUA + "Arena already exists!");
-                            }
+                           Player p = (Player) sender;
+                            p.sendMessage(ChatColor.RED + "Please specify an arena type!");
+
                         } else {
                             sender.sendMessage(ChatColor.RED + "Silly console! Creating arenas are for players!");
                         }
@@ -375,9 +368,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 if (!arenas.containsKey(arenaName)) {
                                     if (ArenaType.valueOf(args[3].toUpperCase()) != null) {
                                         if (!arenas.containsKey(arenaName)) {
-                                            Arena arena = new Arena(this, location, 2, 20);
+                                            Arena arena = new Arena(this, location, 2, 20,args[3].toUpperCase());
                                             arenas.put(arenaName, arena);
-                                            arena.setType(ArenaType.valueOf(args[3]));
                                             save();
                                             player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
                                         } else {
