@@ -147,6 +147,11 @@ public class Arena {
         return state == ArenaState.LOBBY && players.size() >= minPlayers;
     }
 
+    public void lobbyMessage() {
+        String message = "Waiting for " + (minPlayers - players.size()) + " more players!";
+        messagePlayers(message);
+    }
+
     public void messagePlayers(String message) {
         Server server = plugin.getServer();
         for (String player : players) {

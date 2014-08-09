@@ -43,6 +43,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             ConfigurationSection arenaConfig = configuration.createSection(entry.getKey());
             entry.getValue().save(arenaConfig);
         }
+        saveConfig();
     }
 
     public void load() {
@@ -291,6 +292,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                 final String ar = args[2];
                                                 if (arena.isReady()) {
                                                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin start " + ar);
+                                                } else {
+                                                    arena.lobbyMessage();
                                                 }
                                             } else {
                                                 Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "There are too many players! Wait until next round!");
