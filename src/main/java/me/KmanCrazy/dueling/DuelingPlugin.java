@@ -223,7 +223,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 final Location treasureroom = new Location(Bukkit.getWorld(arena.getString("treasureroom.world")), arena.getInt("treasureroom.x"), arena.getInt("treasureroom.y"), arena.getInt("treasureroom.z"));
                                 final Location specroom = new Location(Bukkit.getWorld(arena.getString("spec.world")), arena.getInt("spec.x"), arena.getInt("spec.y"), arena.getInt("spec.z"));
                                 for (String s : arena.getStringList("players")) {
-                                    Bukkit.getPlayer(s).sendMessage("The game is beginning in 10 seconds!");
+                                    Bukkit.getPlayer(s).sendMessage(ChatColor.AQUA + "The game is beginning in 10 seconds!");
                                 }
                                 Bukkit.getScheduler().runTaskLater(this,new Runnable() {
                                     @Override
@@ -691,6 +691,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                             ConfigurationSection arena = getConfig().getConfigurationSection(args[1]);
                             if (args[0].equalsIgnoreCase("setminplayers")) {
                                 arena.set("minplayers",Integer.parseInt(args[2]));
+                                saveConfig();
+                                reloadConfig();
                             } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
                                 arena.set("maxplayers",Integer.parseInt(args[2]));
                                 saveConfig();
