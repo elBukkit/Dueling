@@ -249,7 +249,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.BLUE + "-----------------");
                     sender.sendMessage(ChatColor.GOLD + "/dueling info");
                     sender.sendMessage(ChatColor.GOLD + "/dueling help");
-                    sender.sendMessage(ChatColor.GOLD + "/dueling join");
                     if (sender.hasPermission("dueling.admin")) {
                         sender.sendMessage(ChatColor.GOLD + "/dueling admin");
                     }
@@ -344,7 +343,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                 player.setHealth(20.0);
                                                 player.setFoodLevel(20);
                                                 player.setFireTicks(0);
-                                                for (PotionEffect pt : player.getActivePotionEffects()){
+                                                for (PotionEffect pt : player.getActivePotionEffects()) {
                                                     player.removePotionEffect(pt.getType());
                                                 }
                                                 final String ar = args[2];
@@ -368,53 +367,29 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                             } else {
                                 sender.sendMessage(ChatColor.AQUA + "Unknown arena!");
                             }
-                        } else if (args[1].equalsIgnoreCase("create")){
+                        } else if (args[1].equalsIgnoreCase("create")) {
                             if (sender instanceof Player) {
                                 Player player = (Player) sender;
                                 Location location = player.getLocation();
                                 String arenaName = args[2];
                                 if (!arenas.containsKey(arenaName)) {
-                                    if (args[3].equalsIgnoreCase("FFA")) {
-
-                                        Arena arena = new Arena(this, location, 2, 20);
-                                        arenas.put(arenaName, arena);
-                                        save();
-                                        player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                                    }
-                                   else if (args[3].equalsIgnoreCase("1v1")) {
-                                        Arena arena = new Arena(this, location, 2, 2);
-                                        arenas.put(arenaName, arena);
-                                        save();
-                                        player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                                    }
-                                    else if (args[3].equalsIgnoreCase("2v2")) {
-
-                                        Arena arena = new Arena(this, location, 4, 4);
-                                        arenas.put(arenaName, arena);
-                                        save();
-
-                                        player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                                    } else if (args[3].equalsIgnoreCase("3v3")) {
-                                        Arena arena = new Arena(this, location, 6, 6);
-                                        arenas.put(arenaName, arena);
-                                        save();
-
-                                        player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                                    } else if (args[3].equalsIgnoreCase("Spleef")) {
-
-                                        Arena arena = new Arena(this, location, 5, 15);
-                                        arenas.put(arenaName, arena);
-                                        save();
-                                        player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
-                                    } else{
+                                    if (ArenaType.valueOf(args[3].toUpperCase()) != null) {
+                                        if (!arenas.containsKey(arenaName)) {
+                                            Arena arena = new Arena(this, location, 2, 20);
+                                            arenas.put(arenaName, arena);
+                                            arena.setType(ArenaType.valueOf(args[3]));
+                                            save();
+                                            player.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                        } else {
+                                            sender.sendMessage(ChatColor.AQUA + "Arena already exists!");
+                                        }
+                                    } else {
                                         player.sendMessage(ChatColor.RED + "Unknown arena type please select one of the following: Spleef, FFA, 1v1, 2v2, 3v3");
                                     }
-                                } else {
-                                    sender.sendMessage(ChatColor.AQUA + "Arena already exists!");
                                 }
-                            } else {
-                                sender.sendMessage(ChatColor.RED + "Silly console! Creating arenas are for players!");
                             }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Silly console! Creating arenas are for players!");
                         }
                     }
                 }
