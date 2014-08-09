@@ -122,14 +122,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent e) {
-        Player player = e.getPlayer();
-        if (playerLeft(player)) {
-            e.setQuitMessage(ChatColor.AQUA + e.getPlayer().getName() + " was a wimp and quit out of an arena!");
-        }
-    }
-
-    @EventHandler
     public void onPlayerKick(PlayerKickEvent e) {
         Player player = e.getPlayer();
         if (playerLeft(player)) {
@@ -205,7 +197,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (args[1].equalsIgnoreCase("create")) {
-                        sender.sendMessage("You must specify an arena! (Optional: Type) (Normal Type: FFA)");
+                        sender.sendMessage("You must specify an arena! (Optional: ArenaType) (Normal ArenaType: FFA)");
                     }
                     if (args[1].equalsIgnoreCase("join")) {
                         sender.sendMessage("You must specify a name and a player!");
@@ -411,26 +403,13 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                             } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
                                 arena.setMaxPlayers(Integer.parseInt(args[2]));
                                 save();
-                            } else  if (args[2].equalsIgnoreCase("FFA")) {
-                                arena.setMinPlayers(2);
-                                arena.setMaxPlayers(20);
-                                save();
-                            } else if (args[2].equalsIgnoreCase("1v1")) {
-                                arena.setMinPlayers(2);
-                                arena.setMaxPlayers(2);
-                                save();
-                            } else if (args[2].equalsIgnoreCase("2v2")) {
-                                arena.setMinPlayers(4);
-                                arena.setMaxPlayers(4);
-                                save();
-                            } else if (args[2].equalsIgnoreCase("3v3")){
-                                arena.setMinPlayers(6);
-                                arena.setMaxPlayers(6);
-                                save();
-                            } else if (args[2].equalsIgnoreCase("Spleef")) {
-                                arena.setMinPlayers(5);
-                                arena.setMaxPlayers(15);
-                                save();
+                            }else if (args[0].equalsIgnoreCase("settype")){
+                                if (ArenaType.valueOf(args[2].toUpperCase() )!= null){
+                                    arena.setType(ArenaType.valueOf(args[2]));
+                                    save();
+                                }else{
+                                    p.sendMessage(ChatColor.RED + "Unknown ArenaType!");
+                                }
                             }
                         } else{
                             p.sendMessage(ChatColor.RED + "Unkown arena!");

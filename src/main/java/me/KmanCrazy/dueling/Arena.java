@@ -1,6 +1,5 @@
 package me.KmanCrazy.dueling;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.ConfigurationSection;
@@ -229,5 +228,35 @@ public class Arena {
 
     public void setMaxPlayers(int players) {
         maxPlayers = players;
+    }
+
+    public void setType(ArenaType type){
+        switch (type) {
+            case FFA:
+                setMinPlayers(2);
+                setMaxPlayers(20);
+                break;
+            case FOURVFOUR:
+                setMinPlayers(8);
+                setMaxPlayers(8);
+                break;
+            case ONEVONE:
+                setMinPlayers(2);
+                setMinPlayers(2);
+                break;
+            case TWOVTWO:
+                setMinPlayers(4);
+                setMaxPlayers(4);
+                break;
+            case THREEVTHREE:
+                setMinPlayers(6);
+                setMaxPlayers(6);
+                break;
+            case SPLEEF:
+                setMinPlayers(5);
+                setMaxPlayers(15);
+                break;
+
+        }
     }
 }
