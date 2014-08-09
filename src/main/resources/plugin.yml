@@ -1,5 +1,5 @@
 name: Dueling
-version: 0.1
+version: ${project.version}
 author: KmanCrazy
 main: me.KmanCrazy.dueling.DuelingPlugin
 commands:
