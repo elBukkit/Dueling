@@ -568,8 +568,58 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                         saveConfig();
                                         reloadConfig();
                                         p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }else if (args[3].equalsIgnoreCase("4v4")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 8);
+                                        arena.set("minplayers", 8);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
+                                    }else if (args[3].equalsIgnoreCase("5v5")){
+                                        arena.set("lobby.x", p.getLocation().getX());
+                                        arena.set("lobby.y", p.getLocation().getY());
+                                        arena.set("lobby.z", p.getLocation().getZ());
+                                        arena.set("lobby.world", p.getLocation().getWorld().getName());
+                                        arena.set("spawn.x", p.getLocation().getX());
+                                        arena.set("spawn.y", p.getLocation().getY());
+                                        arena.set("spawn.z", p.getLocation().getZ());
+                                        arena.set("spawn.world", p.getLocation().getWorld().getName());
+                                        arena.set("treasureroom.x", p.getLocation().getX());
+                                        arena.set("treasureroom.y", p.getLocation().getY());
+                                        arena.set("treasureroom.z", p.getLocation().getZ());
+                                        arena.set("treasureroom.world", p.getLocation().getWorld().getName());
+                                        arena.set("spec.x", p.getLocation().getX());
+                                        arena.set("spec.y", p.getLocation().getY());
+                                        arena.set("spec.z", p.getLocation().getZ());
+                                        arena.set("spec.world", p.getLocation().getWorld().getName());
+                                        arena.set("maxplayers", 10);
+                                        arena.set("minplayers", 10);
+                                        arena.set("lobbystate", true);
+                                        List<String> list = new ArrayList<String>();
+                                        arena.set("players", list);
+                                        saveConfig();
+                                        reloadConfig();
+                                        p.sendMessage(ChatColor.AQUA + "Arena Created now do /options setlobby, setspawn, setspec, settreasureroom!");
                                     }else{
-                                        p.sendMessage(ChatColor.RED + "Unknown arena type please select one of the following: Spleef, FFA, 1v1, 2v2, 3v3");
+                                        p.sendMessage(ChatColor.RED + "Unknown arena type please select one of the following: Spleef, FFA, 1v1, 2v2, 3v3, 4v4");
                                     }
 
                                 } else {
@@ -601,21 +651,21 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("lobby.z", p.getLocation().getZ());
                                 arena.set("lobby.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
-                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
+                                p.sendMessage(ChatColor.AQUA + "You have set the lobby!");
                             } else if (args[0].equalsIgnoreCase("setspawn")) {
                                 arena.set("spawn.x", p.getLocation().getX());
                                 arena.set("spawn.y", p.getLocation().getY());
                                 arena.set("spawn.z", p.getLocation().getZ());
                                 arena.set("spawn.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
-                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
+                                p.sendMessage(ChatColor.AQUA + "You have set the spawn!");
                             } else if (args[0].equalsIgnoreCase("setspec")) {
                                 arena.set("spec.x", p.getLocation().getX());
                                 arena.set("spec.y", p.getLocation().getY());
                                 arena.set("spec.z", p.getLocation().getZ());
                                 arena.set("spec.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
-                                p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
+                                p.sendMessage(ChatColor.AQUA + "You have set the spectator room!");
                             } else if (args[0].equalsIgnoreCase("settreasureroom")) {
                                 arena.set("treasureroom.x", p.getLocation().getX());
                                 arena.set("treasureroom.y", p.getLocation().getY());
@@ -623,7 +673,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.set("treasureroom.world", p.getLocation().getWorld().getName());
                                 saveConfig();reloadConfig();
                                 p.sendMessage(ChatColor.AQUA + "You have set the treasure room!");
-
                             }else if (args[0].equalsIgnoreCase("setminplayers")){
                                 p.sendMessage(ChatColor.DARK_RED + "You must specify a number of minimum players!");
 
@@ -641,9 +690,9 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                         if (getConfig().getConfigurationSection(args[1]) != null) {
                             ConfigurationSection arena = getConfig().getConfigurationSection(args[1]);
                             if (args[0].equalsIgnoreCase("setminplayers")) {
-                                arena.set("minplayers",args[2]);
+                                arena.set("minplayers",Integer.parseInt(args[2]));
                             } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
-                                arena.set("maxplayers",args[2]);
+                                arena.set("maxplayers",Integer.parseInt(args[2]));
                                 saveConfig();
                                 reloadConfig();
                             }
@@ -666,6 +715,16 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 }else if (args[2].equalsIgnoreCase("3v3")){
                                 arena.set("maxplayers",6);
                                 arena.set("minplayers",6);
+                                saveConfig();
+                                reloadConfig();
+                            }else if (args[2].equalsIgnoreCase("4v4")){
+                                arena.set("maxplayers",8);
+                                arena.set("minplayers",8);
+                                saveConfig();
+                                reloadConfig();
+                            }else if (args[2].equalsIgnoreCase("5v5")){
+                                arena.set("maxplayers",10);
+                                arena.set("minplayers",10);
                                 saveConfig();
                                 reloadConfig();
                             }else if (args[2].equalsIgnoreCase("Spleef")){
