@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
@@ -286,7 +287,11 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                     }
                 }
             } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("admin")) {
+                if (args[0].equalsIgnoreCase("admin") && (sender instanceof ConsoleCommandSender || sender.hasPermission("dueling.admin"))) {
+                    if (args[1].equalsIgnoreCase("load")) {
+                        load();
+                        sender.sendMessage("Configuration reloaded");
+                    }
                     if (args[1].equalsIgnoreCase("create")) {
                         sender.sendMessage("You must specify an arena! (Optional: ArenaType) (Normal ArenaType: FFA)");
                     }
@@ -355,10 +360,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             } else if (args.length == 4) {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (sender.hasPermission("dueling.admin")) {
-                        if (args[1].equalsIgnoreCase("load")) {
-                            load();
-                            sender.sendMessage("Configuration reloaded");
-                        } else
                         if (args[1].equalsIgnoreCase("join")) {
                             Arena arena = arenas.get(args[2]);
                             if (arena != null) {
