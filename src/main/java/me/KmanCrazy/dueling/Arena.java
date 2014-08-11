@@ -48,7 +48,7 @@ public class Arena {
         arenaType = type;
     }
 
-    public String fromVector(Vector vector) {
+    public static String fromVector(Vector vector) {
         if (vector == null) return "";
         return vector.getX() + "," + vector.getY() + "," + vector.getZ();
     }
@@ -408,5 +408,9 @@ public class Arena {
 
     public String getType(){
         return arenaType;
+    }
+
+    public void setRandomizeSpawn(Vector vector) {
+        randomizeSpawn = vector;
     }
 }

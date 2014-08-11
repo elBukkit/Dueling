@@ -137,6 +137,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             for (MetadataValue value : metadata) {
                 player.removeMetadata("respawnLocation", value.getOwningPlugin());
                 e.setRespawnLocation((Location)value.value());
+                break;
             }
         }
     }
@@ -465,8 +466,10 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 p.sendMessage(ChatColor.DARK_RED + "You must specify a number of maximum players!");
                             } else if (args[0].equalsIgnoreCase("settype")) {
                                 p.sendMessage(ChatColor.DARK_RED + "You must specify an arena type!");
-                            }else {
-                                sender.sendMessage(ChatColor.AQUA + "Unknown option!");
+                            } else if (args[0].equalsIgnoreCase("setrandomize")) {
+                                p.sendMessage(ChatColor.DARK_RED + "You must specify a vector x,y,z");
+                            } else {
+                                sender.sendMessage(ChatColor.DARK_RED + "Unknown option!");
                             }
                         }
                     } else if (args.length == 3) {
@@ -474,27 +477,38 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                         if (arena != null) {
                             if (args[0].equalsIgnoreCase("setminplayers")) {
                                 arena.setMinPlayers(Integer.parseInt(args[2]));
+                                sender.sendMessage(ChatColor.AQUA + "Set min players");
                                 save();
                             } else if (args[0].equalsIgnoreCase("setmaxplayers")) {
                                 arena.setMaxPlayers(Integer.parseInt(args[2]));
+                                sender.sendMessage(ChatColor.AQUA + "Set max players");
                                 save();
-                            }else if (args[0].equalsIgnoreCase("settype")){
+                            } else if (args[0].equalsIgnoreCase("settype")){
                                 if (ArenaType.valueOf(args[2].toUpperCase() )!= null){
                                     arena.setType(ArenaType.valueOf(args[2]));
+                                    sender.sendMessage(ChatColor.AQUA + "Set arena type");
                                     save();
                                 }else{
                                     p.sendMessage(ChatColor.RED + "Unknown ArenaType!");
                                 }
+                            } else if (args[0].equalsIgnoreCase("setrandomize")) {
+                                if (args[2].isEmpty()) {
+                                    p.sendMessage(ChatColor.RED + "Cleared randomized spawn!");
+                                    arena.setRandomizeSpawn(null);
+                                } else {
+                                    sender.sendMessage(ChatColor.AQUA + "Set randomized spawn");
+                                    arena.setRandomizeSpawn(Arena.toVector(args[2]));
+                                }
                             }
                         } else{
-                            p.sendMessage(ChatColor.RED + "Unkown arena!");
+                            p.sendMessage(ChatColor.RED + "Unknown arena!");
                         }
                     } else {
                         sender.sendMessage(ChatColor.RED + "Invalid parameters!");
                     }
                 }
             } else {
-                sender.sendMessage(ChatColor.AQUA + "You dont have permissions!");
+                sender.sendMessage(ChatColor.AQUA + "You don't have permissions!");
             }
         }
         return false;
