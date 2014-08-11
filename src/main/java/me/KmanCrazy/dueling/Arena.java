@@ -1,8 +1,7 @@
 package me.KmanCrazy.dueling;
 
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Location;
-import org.bukkit.Server;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -13,11 +12,13 @@ import java.util.*;
 public class Arena {
     private ArenaState state = ArenaState.LOBBY;
     private Set<String> players = new HashSet<String>();
-    private Set<String> spawns = new HashSet<String>();
+    private List<String> spawns = new ArrayList<String>();
     private final Plugin plugin;
 
+    private int num = 0;
+
     private Location spectating;
-    private Location spawn;
+    //private Location spawn;
     private Location treasure;
     private Location lobby;
 
@@ -33,14 +34,49 @@ public class Arena {
     public Arena(Plugin plugin, Location location, int min, int max,String type) {
         this(plugin);
         spectating = location.clone();
-        spawn = location.clone();
         treasure = location.clone();
         lobby = location.clone();
+        spawns.add(fromLocation(location.clone()));
 
         maxPlayers = max;
         minPlayers = min;
 
         arenaType = type;
+    }
+    public String fromLocation(Location location) {
+        if (location == null) return "";
+        if (location.getWorld() == null) return "";
+        return location.getX() + "," + location.getY() + "," + location.getZ() + "," + location.getWorld().getName()
+                + "," + location.getYaw() + "," + location.getPitch();
+    }
+    public Location toLocation(Object o) {
+        if (o instanceof Location) {
+            return (Location)o;
+        }
+        if (o instanceof String) {
+            try {
+                float pitch = 0;
+                float yaw = 0;
+                String[] pieces = StringUtils.split((String)o, ',');
+                double x = Double.parseDouble(pieces[0]);
+                double y = Double.parseDouble(pieces[1]);
+                double z = Double.parseDouble(pieces[2]);
+                World world = null;
+                if (pieces.length > 3) {
+                    world = Bukkit.getWorld(pieces[3]);
+                } else {
+                    world = Bukkit.getWorlds().get(0);
+                }
+                if (pieces.length > 5) {
+                    yaw = Float.parseFloat(pieces[4]);
+                    pitch = Float.parseFloat(pieces[5]);
+                }
+                return new Location(world, x, y, z, yaw, pitch);
+            } catch(Exception ex) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public void load(ConfigurationSection configuration) {
@@ -50,10 +86,10 @@ public class Arena {
         arenaType = configuration.getString("type");
 
         spectating = new Location(
-            plugin.getServer().getWorld(configuration.getString("spec.world")),
-            configuration.getInt("spec.x"),
-            configuration.getInt("spec.y"),
-            configuration.getInt("spec.z")
+                plugin.getServer().getWorld(configuration.getString("spec.world")),
+                configuration.getInt("spec.x"),
+                configuration.getInt("spec.y"),
+                configuration.getInt("spec.z")
         );
         spectating.setPitch(configuration.getInt("spec.pitch"));
         spectating.setYaw(configuration.getInt("spec.yaw"));
@@ -66,14 +102,10 @@ public class Arena {
         );
         lobby.setPitch(configuration.getInt("lobby.pitch"));
         lobby.setYaw(configuration.getInt("lobby.yaw"));
-        spawn = new Location(
-                plugin.getServer().getWorld(configuration.getString("spawn.world")),
-                configuration.getInt("spawn.x"),
-                configuration.getInt("spawn.y"),
-                configuration.getInt("spawn.z")
-        );
-        spawn.setPitch(configuration.getInt("spawn.pitch"));
-        spawn.setYaw(configuration.getInt("spawn.yaw"));
+        for (String s : configuration.getStringList("spawns")){
+            spawns.add(s);
+        }
+
         treasure = new Location(
                 plugin.getServer().getWorld(configuration.getString("treasureroom.world")),
                 configuration.getInt("treasureroom.x"),
@@ -105,12 +137,7 @@ public class Arena {
         configuration.set("lobby.pitch", lobby.getPitch());
         configuration.set("lobby.yaw", lobby.getYaw());
 
-        configuration.set("spawn.world", spawn.getWorld().getName());
-        configuration.set("spawn.x", spawn.getBlockX());
-        configuration.set("spawn.y", spawn.getBlockY());
-        configuration.set("spawn.z", spawn.getBlockZ());
-        configuration.set("spawn.pitch", spawn.getPitch());
-        configuration.set("spawn.yaw", spawn.getYaw());
+        configuration.set("spawns",spawns);
 
         configuration.set("treasureroom.world", treasure.getWorld().getName());
         configuration.set("treasureroom.x", treasure.getBlockX());
@@ -126,7 +153,11 @@ public class Arena {
         for (String playerName : players) {
             Player player = server.getPlayer(playerName);
             player.sendMessage("Begin!");
+
+            Location spawn = toLocation(spawns.get(num));
+            num++;
             player.teleport(spawn);
+
         }
     }
 
@@ -143,6 +174,7 @@ public class Arena {
             state = ArenaState.LOBBY;
             String winner = players.iterator().next();
             players.clear();
+            num = 0;
             return plugin.getServer().getPlayer(winner);
         }
 
@@ -204,10 +236,10 @@ public class Arena {
         }
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
         scheduler.runTaskLater(plugin, new Runnable() {
-           @Override
+            @Override
             public void run() {
-               countdown(time - 1);
-           }
+                countdown(time - 1);
+            }
         }, 20);
     }
 
@@ -229,6 +261,7 @@ public class Arena {
 
     public void add(Player player) {
         players.add(player.getName());
+        player.teleport(lobby);
     }
 
     public void setSpectatingRoom(Location location) {
@@ -243,8 +276,26 @@ public class Arena {
         treasure = location.clone();
     }
 
-    public void setSpawn(Location location) {
-        spawn = location.clone();
+    public void addSpawn(Location location) {
+        spawns.add(fromLocation(location));
+    }
+    public void removeSpawn(Location location) {
+        Location l = location;
+        int range = 3;
+        int minX = l.getBlockX() - range / 2;
+        int minY = l.getBlockY() - range / 2;
+        int minZ = l.getBlockZ() - range / 2;
+
+        for (int x = minX; x < minX + range; x++) {
+            for (int y = minY; y < minY + range; y++) {
+                for (int z = minZ; z < minZ + range; z++) {
+                    Location loc = location.getWorld().getBlockAt(x, y, z).getLocation();
+                    if (spawns.contains(loc)) {
+                        spawns.remove(fromLocation(loc));
+                    }
+                }
+            }
+        }
     }
 
     public void setMinPlayers(int players) {

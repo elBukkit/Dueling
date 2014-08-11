@@ -309,7 +309,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (args[1].equalsIgnoreCase("create")) {
                         if (sender instanceof Player) {
-                           Player p = (Player) sender;
+                            Player p = (Player) sender;
                             p.sendMessage(ChatColor.RED + "Please specify an arena type!");
 
                         } else {
@@ -333,7 +333,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                         }
                     }
                     if (args[1].equalsIgnoreCase("remove")) {
-                        sender.sendMessage(ChatColor.AQUA + "You must specify an arena!");
                         arenas.remove(args[2]);
                         save();
                     }
@@ -435,10 +434,14 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                 arena.setLobby(location);
                                 save();
                                 p.sendMessage(ChatColor.AQUA + "You have set the lobby!");
-                            } else if (args[0].equalsIgnoreCase("setspawn")) {
-                                arena.setSpawn(location);
+                            } else if (args[0].equalsIgnoreCase("addspawn")) {
+                                arena.addSpawn(location);
                                 save();
-                                p.sendMessage(ChatColor.AQUA + "You have set the spawn location!");
+                                p.sendMessage(ChatColor.AQUA + "You have added a spawn location!");
+                            }  else if (args[0].equalsIgnoreCase("removespawn")) {
+                                arena.removeSpawn(location);
+                                save();
+                                p.sendMessage(ChatColor.AQUA + "You have removed a spawn location!");
                             } else if (args[0].equalsIgnoreCase("setspec")) {
                                 arena.setSpectatingRoom(location);
                                 save();
