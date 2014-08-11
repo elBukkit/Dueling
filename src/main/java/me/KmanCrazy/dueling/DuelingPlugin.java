@@ -224,6 +224,37 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             }
         }
     }
+    @EventHandler
+    public void onSignChange2(SignChangeEvent e){
+        if (e.getLine(0).contains("Leave")) {
+            if (!e.getLine(1).isEmpty()) {
+                String arenaName = e.getLine(1);
+                Arena arena = arenas.get(arenaName);
+                if (arena != null) {
+                    e.setLine(0,ChatColor.GOLD + "[" + ChatColor.BLUE + "Leave" + ChatColor.GOLD + "]");
+                } else {
+                    e.getBlock().breakNaturally();
+                    e.getPlayer().sendMessage(ChatColor.RED + "Unknown arena!");
+                }
+            } else{
+                e.getBlock().breakNaturally();
+                e.getPlayer().sendMessage(ChatColor.RED + "You must specify an arena!");
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRightClickSign2(PlayerInteractEvent e){
+        Block clickedBlock = e.getClickedBlock();
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (clickedBlock.getType() == Material.SIGN || clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN)) {
+            Sign sign = (Sign) e.getClickedBlock().getState();
+            if (sign.getLine(0).contains("Leave")) {
+                Arena arena = arenas.get(sign.getLine(1));
+                arena.remove(e.getPlayer());
+            }
+        }
+    }
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

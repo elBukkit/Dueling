@@ -1,5 +1,6 @@
 package me.KmanCrazy.dueling;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,6 +13,7 @@ import java.util.*;
 public class Arena {
     private ArenaState state = ArenaState.LOBBY;
     private Set<String> players = new HashSet<String>();
+    private Set<String> spawns = new HashSet<String>();
     private final Plugin plugin;
 
     private Location spectating;
