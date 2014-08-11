@@ -32,7 +32,14 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
-        load();
+
+        // Make sure not to load configs until all worlds are loaded
+        Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+            @Override
+            public void run() {
+                load();
+            }
+        }, 2);
     }
 
     public void save() {
@@ -50,10 +57,10 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
 
     public void load() {
         Configuration configuration = getConfig();
-        Collection<String> arenaKeya = configuration.getKeys(false);
+        Collection<String> arenaKeys = configuration.getKeys(false);
 
         arenas.clear();
-        for (String arenaKey : arenaKeya) {
+        for (String arenaKey : arenaKeys) {
             Arena arena = new Arena(this);
             arena.load(configuration.getConfigurationSection(arenaKey));
             arenas.put(arenaKey, arena);
@@ -348,6 +355,10 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             } else if (args.length == 4) {
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (sender.hasPermission("dueling.admin")) {
+                        if (args[1].equalsIgnoreCase("load")) {
+                            load();
+                            sender.sendMessage("Configuration reloaded");
+                        } else
                         if (args[1].equalsIgnoreCase("join")) {
                             Arena arena = arenas.get(args[2]);
                             if (arena != null) {
