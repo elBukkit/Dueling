@@ -166,9 +166,6 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
         if (winner != null) {
             Server server = getServer();
             winner.sendMessage(ChatColor.AQUA + "You have won! Congratulations!");
-            winner.setHealth(20.0);
-            winner.setFoodLevel(20);
-            winner.setFireTicks(0);
             spawnFirework(winner);
             server.broadcastMessage(ChatColor.GOLD + winner.getDisplayName() + " has won a battle!");
             Bukkit.getScheduler().runTaskLater(this, new Runnable() {
@@ -176,6 +173,9 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 public void run() {
                     winner.sendMessage(ChatColor.AQUA + "Enjoy the treasure!");
                     winner.teleport(arena.getTreasureRoom());
+                    winner.setHealth(20.0);
+                    winner.setFoodLevel(20);
+                    winner.setFireTicks(0);
                 }
             }, 5 * 20);
         } else {
