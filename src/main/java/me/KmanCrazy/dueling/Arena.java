@@ -265,8 +265,11 @@ public class Arena {
     }
 
     public void lobbyMessage() {
-        String message = "Waiting for " + (minPlayers - players.size()) + " more players!";
-        messagePlayers(message);
+        int playerCount = players.size();
+        if (playerCount < minPlayers) {
+            String message = "Waiting for " + (minPlayers - playerCount) + " more players!";
+            messagePlayers(message);
+        }
     }
 
     public void messagePlayers(String message) {
