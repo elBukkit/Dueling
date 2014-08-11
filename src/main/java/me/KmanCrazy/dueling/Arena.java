@@ -10,17 +10,19 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.util.*;
 
 public class Arena {
+    private static Random random = new Random();
+
     private ArenaState state = ArenaState.LOBBY;
     private Set<String> players = new HashSet<String>();
-    private List<String> spawns = new ArrayList<String>();
+    private List<Location> spawns = new ArrayList<Location>();
     private final Plugin plugin;
-
-    private int num = 0;
 
     private Location spectating;
     //private Location spawn;
     private Location treasure;
     private Location lobby;
+
+    private Vector randomizeSpawn;
 
     private int maxPlayers;
     private int minPlayers;
@@ -36,19 +38,21 @@ public class Arena {
         spectating = location.clone();
         treasure = location.clone();
         lobby = location.clone();
-        spawns.add(fromLocation(location.clone()));
+        spawns.add(location.clone());
 
         maxPlayers = max;
         minPlayers = min;
 
         arenaType = type;
     }
+
     public String fromLocation(Location location) {
         if (location == null) return "";
         if (location.getWorld() == null) return "";
         return location.getX() + "," + location.getY() + "," + location.getZ() + "," + location.getWorld().getName()
                 + "," + location.getYaw() + "," + location.getPitch();
     }
+
     public Location toLocation(Object o) {
         if (o instanceof Location) {
             return (Location)o;
@@ -102,8 +106,19 @@ public class Arena {
         );
         lobby.setPitch(configuration.getInt("lobby.pitch"));
         lobby.setYaw(configuration.getInt("lobby.yaw"));
+
+        if (configuration.contains("spawn.world")) {
+            Location legacySpawn = new Location(
+                    plugin.getServer().getWorld(configuration.getString("spawn.world")),
+                    configuration.getInt("spawn.x"),
+                    configuration.getInt("spawn.y"),
+                    configuration.getInt("spawn.z")
+            );
+            spawns.add(legacySpawn);
+        }
+
         for (String s : configuration.getStringList("spawns")){
-            spawns.add(s);
+            spawns.add(toLocation(s));
         }
 
         treasure = new Location(
@@ -137,7 +152,11 @@ public class Arena {
         configuration.set("lobby.pitch", lobby.getPitch());
         configuration.set("lobby.yaw", lobby.getYaw());
 
-        configuration.set("spawns",spawns);
+        List<String> spawnList = new ArrayList<String>();
+        for (Location spawn : spawns) {
+            spawnList.add(fromLocation(spawn));
+        }
+        configuration.set("spawns", spawnList);
 
         configuration.set("treasureroom.world", treasure.getWorld().getName());
         configuration.set("treasureroom.x", treasure.getBlockX());
@@ -145,19 +164,25 @@ public class Arena {
         configuration.set("treasureroom.z", treasure.getBlockZ());
         configuration.set("treasureroom.pitch", treasure.getPitch());
         configuration.set("treasureroom.yaw", treasure.getYaw());
+
+        if (randomizeSpawn != null) {
+            
+        }
     }
 
     public void start() {
         state = ArenaState.ACTIVE;
         Server server = plugin.getServer();
+        int num = 0;
         for (String playerName : players) {
             Player player = server.getPlayer(playerName);
             player.sendMessage("Begin!");
 
-            Location spawn = toLocation(spawns.get(num));
-            num++;
-            player.teleport(spawn);
+            Location spawn = spawns.get(num);
 
+            // Wrap index around to player
+            num = (num + 1) % spawns.size();
+            player.teleport(spawn);
         }
     }
 
@@ -174,7 +199,6 @@ public class Arena {
             state = ArenaState.LOBBY;
             String winner = players.iterator().next();
             players.clear();
-            num = 0;
             return plugin.getServer().getPlayer(winner);
         }
 
@@ -277,8 +301,9 @@ public class Arena {
     }
 
     public void addSpawn(Location location) {
-        spawns.add(fromLocation(location));
+        spawns.add(location.clone());
     }
+
     public void removeSpawn(Location location) {
         Location l = location;
         int range = 3;
@@ -291,7 +316,7 @@ public class Arena {
                 for (int z = minZ; z < minZ + range; z++) {
                     Location loc = location.getWorld().getBlockAt(x, y, z).getLocation();
                     if (spawns.contains(loc)) {
-                        spawns.remove(fromLocation(loc));
+                        spawns.remove(loc);
                     }
                 }
             }
