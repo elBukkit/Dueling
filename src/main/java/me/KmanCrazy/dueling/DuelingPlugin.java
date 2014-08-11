@@ -57,6 +57,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     }
 
     public void load() {
+        reloadConfig();
         Configuration configuration = getConfig();
         Collection<String> arenaKeys = configuration.getKeys(false);
 
