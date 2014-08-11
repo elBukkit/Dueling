@@ -6,6 +6,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.util.*;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -44,6 +46,29 @@ public class Arena {
         minPlayers = min;
 
         arenaType = type;
+    }
+
+    public String fromVector(Vector vector) {
+        if (vector == null) return "";
+        return vector.getX() + "," + vector.getY() + "," + vector.getZ();
+    }
+
+    public static Vector toVector(Object o) {
+        if (o instanceof Vector) {
+            return (Vector)o;
+        }
+        if (o instanceof String) {
+            try {
+                String[] pieces = StringUtils.split((String)o, ',');
+                double x = Double.parseDouble(pieces[0]);
+                double y = Double.parseDouble(pieces[1]);
+                double z = Double.parseDouble(pieces[2]);
+                return new Vector(x, y, z);
+            } catch(Exception ex) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public String fromLocation(Location location) {
@@ -130,6 +155,9 @@ public class Arena {
         );
         treasure.setPitch(configuration.getInt("treasureroom.pitch"));
         treasure.setYaw(configuration.getInt("treasureroom.yaw"));
+        if (configuration.contains("randomize.spawn")) {
+            randomizeSpawn = toVector(configuration.getString("randomize.spawn"));
+        }
     }
 
     public void save(ConfigurationSection configuration) {
@@ -166,7 +194,7 @@ public class Arena {
         configuration.set("treasureroom.yaw", treasure.getYaw());
 
         if (randomizeSpawn != null) {
-            
+            configuration.set("randomize.spawn", fromVector(randomizeSpawn));
         }
     }
 
@@ -179,6 +207,15 @@ public class Arena {
             player.sendMessage("Begin!");
 
             Location spawn = spawns.get(num);
+            if (randomizeSpawn != null) {
+                spawn = spawn.clone();
+                spawn.add
+                (
+                    (2 * random.nextDouble() - 1) * randomizeSpawn.getX(),
+                    (2 * random.nextDouble() - 1) * randomizeSpawn.getY(),
+                    (2 * random.nextDouble() - 1) * randomizeSpawn.getZ()
+                );
+            }
 
             // Wrap index around to player
             num = (num + 1) % spawns.size();
