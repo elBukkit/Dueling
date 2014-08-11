@@ -274,8 +274,14 @@ public class Arena {
 
     public void messagePlayers(String message) {
         Server server = plugin.getServer();
-        for (String player : players) {
-            server.getPlayer(player).sendMessage(message);
+        Collection<String> names = new ArrayList<String>(players);
+        for (String playerName : names) {
+            Player player = server.getPlayer(playerName);
+            if (player == null) {
+                players.remove(playerName);
+            } else {
+                player.sendMessage(message);
+            }
         }
     }
 
