@@ -7,14 +7,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -227,19 +226,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onSignChange2(SignChangeEvent e){
         if (e.getLine(0).contains("Leave")) {
-            if (!e.getLine(1).isEmpty()) {
-                String arenaName = e.getLine(1);
-                Arena arena = arenas.get(arenaName);
-                if (arena != null) {
-                    e.setLine(0,ChatColor.GOLD + "[" + ChatColor.BLUE + "Leave" + ChatColor.GOLD + "]");
-                } else {
-                    e.getBlock().breakNaturally();
-                    e.getPlayer().sendMessage(ChatColor.RED + "Unknown arena!");
-                }
-            } else{
-                e.getBlock().breakNaturally();
-                e.getPlayer().sendMessage(ChatColor.RED + "You must specify an arena!");
-            }
+            e.setLine(0,ChatColor.GOLD + "[" + ChatColor.BLUE + "Leave" + ChatColor.GOLD + "]");
         }
     }
 
@@ -249,8 +236,11 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && (clickedBlock.getType() == Material.SIGN || clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN)) {
             Sign sign = (Sign) e.getClickedBlock().getState();
             if (sign.getLine(0).contains("Leave")) {
-                Arena arena = arenas.get(sign.getLine(1));
-                arena.remove(e.getPlayer());
+                for (Arena arenas1 : arenas.values()){
+                    if (arenas1.has(e.getPlayer())){
+                        arenas1.remove(e.getPlayer());
+                    }
+                }
             }
         }
     }
@@ -260,13 +250,12 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("dueling")) {
             if (args.length == 0) {
-                sender.sendMessage(ChatColor.BLUE + "-----------------");
-                sender.sendMessage(ChatColor.GOLD + "/dueling info");
-                sender.sendMessage(ChatColor.GOLD + "/dueling help");
+                sender.sendMessage(ChatColor.YELLOW + "---------" +  ChatColor.WHITE  + "Help: HP Dueling " + ChatColor.YELLOW +   "--------");
+                sender.sendMessage(ChatColor.GOLD + "Player Commands:\n" + ChatColor.WHITE + " /dueling info\n /dueling help");
                 if (sender.hasPermission("dueling.admin")) {
-                    sender.sendMessage(ChatColor.GOLD + "/dueling admin");
+                    sender.sendMessage( "/dueling admin help");
                 }
-                sender.sendMessage(ChatColor.BLUE + "-----------------");
+                sender.sendMessage(ChatColor.YELLOW + "-----------------------------------------------");
             } else if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("info")) {
                     sender.sendMessage(ChatColor.BLUE + "-----------------");
@@ -277,13 +266,12 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.BLUE + "-----------------");
                 }
                 if (args[0].equalsIgnoreCase("help")) {
-                    sender.sendMessage(ChatColor.BLUE + "-----------------");
-                    sender.sendMessage(ChatColor.GOLD + "/dueling info");
-                    sender.sendMessage(ChatColor.GOLD + "/dueling help");
+                    sender.sendMessage(ChatColor.YELLOW + "---------" +  ChatColor.WHITE  + "Help: HP Dueling " + ChatColor.YELLOW +   "--------");
+                    sender.sendMessage(ChatColor.GOLD + "Player Commands\n" + ChatColor.WHITE + " /dueling info\n /dueling help");
                     if (sender.hasPermission("dueling.admin")) {
-                        sender.sendMessage(ChatColor.GOLD + "/dueling admin");
+                        sender.sendMessage( "/dueling admin help");
                     }
-                    sender.sendMessage(ChatColor.BLUE + "-----------------");
+                    sender.sendMessage(ChatColor.YELLOW + "-----------------------------------------------");
                 }
                 if (args[0].equalsIgnoreCase("admin")) {
                     if (sender.hasPermission("dueling.admin")) {
@@ -303,6 +291,14 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                     }
                     if (args[1].equalsIgnoreCase("remove")) {
                         sender.sendMessage("You must specify an arena!");
+                    }
+                    if (args[1].equalsIgnoreCase("help")){
+                        sender.sendMessage(ChatColor.YELLOW + "---------" +  ChatColor.WHITE  + "Help: HP Dueling " + ChatColor.YELLOW +   "--------");
+                        sender.sendMessage(ChatColor.GOLD + "Player Commands:\n" + ChatColor.WHITE + " /dueling info\n /dueling help");
+                        sender.sendMessage(ChatColor.GOLD + "Admin Commands:\n" + ChatColor.WHITE + " /dueling admin help\n /dueling admin create <Arena Name> <Type>\n/dueling admin remove <Arena Name>\n /dueling admin join <Arena Name> <Player>\n dueling admin start <Arena Name>");
+                        sender.sendMessage(ChatColor.GOLD + "Types:" + ChatColor.WHITE + " FFA, Spleef, OneVOne, TwoVTwo, ThreeVThree, FourVFour");
+                        sender.sendMessage(ChatColor.GOLD + "Options:" + ChatColor.WHITE + " SetLobby, SetSpec, SetTreasureRoom, SetType, SetMinPlayers, SetMaxPlayers, AddSpawn, RemoveSpawn");
+                        sender.sendMessage(ChatColor.YELLOW + "-----------------------------------------------");
                     }
                 }
             } else if (args.length == 3) {
