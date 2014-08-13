@@ -29,6 +29,7 @@ import java.util.*;
 
 public class DuelingPlugin extends JavaPlugin implements Listener {
     public Map<String, Arena> arenas = new HashMap<String, Arena>();
+    public static Map<String,String> queue = new HashMap<String, String>();
 
     @Override
     public void onEnable() {
@@ -167,7 +168,7 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             Server server = getServer();
             winner.sendMessage(ChatColor.AQUA + "You have won! Congratulations!");
             spawnFirework(winner);
-            server.broadcastMessage(ChatColor.GOLD + winner.getDisplayName() + " has won a battle!");
+            server.broadcastMessage(ChatColor.GOLD + winner.getDisplayName() + " has won a battle with "+ ChatColor.RED +  + winner.getHealth()/2 + " hearts!");
             Bukkit.getScheduler().runTaskLater(this, new Runnable() {
                 @Override
                 public void run() {
@@ -176,6 +177,9 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                     winner.setHealth(20.0);
                     winner.setFoodLevel(20);
                     winner.setFireTicks(0);
+                    for (String s : queue.keySet()){
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dueling admin join " + queue.get(s) + " " + s);
+                    }
                 }
             }, 5 * 20);
         } else {
@@ -202,6 +206,8 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
         if (playerLeft(player)) {
             e.setLeaveMessage(ChatColor.AQUA + e.getPlayer().getName() + " was kicked out of the arena!");
         }
+
+
     }
 
     @EventHandler
@@ -387,12 +393,24 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                                                 }
                                             } else {
                                                 Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "There are too many players! Wait until next round!");
+                                                if (!queue.containsKey(args[3])) {
+                                                    Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You were added to the queue!");
+                                                    queue.put(player.getName(), args[2]);
+                                                }else{
+                                                    Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "You are already in the queue!");
+                                                }
                                             }
                                         } else {
-                                            Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "That game is already in progress!");
+                                            Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "There are too many players! Wait until next round!");
+                                            if (!queue.containsKey(args[3])) {
+                                                Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "You were added to the queue!");
+                                                queue.put(player.getName(), args[2]);
+                                            }else{
+                                                Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "You are already in the queue!");
+                                            }
                                         }
                                     } else {
-                                        Bukkit.getPlayer(args[3]).sendMessage(ChatColor.AQUA + "Already in game!");
+                                        Bukkit.getPlayer(args[3]).sendMessage(ChatColor.RED + "Already in game!");
                                     }
                                 } else {
                                     sender.sendMessage(ChatColor.AQUA + "Unknown player!");
