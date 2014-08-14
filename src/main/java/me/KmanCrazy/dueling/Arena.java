@@ -267,7 +267,7 @@ public class Arena {
     public void lobbyMessage() {
         int playerCount = players.size();
         if (playerCount < minPlayers) {
-            String message = "Waiting for " + (minPlayers - playerCount) + " more players!";
+            String message = ChatColor.AQUA + String.valueOf(playerCount) + ChatColor.GOLD + "/" + ChatColor.AQUA + String.valueOf(maxPlayers) + " players.";
             messagePlayers(message);
         }
     }
