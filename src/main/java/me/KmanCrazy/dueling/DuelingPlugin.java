@@ -15,11 +15,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,11 +30,14 @@ import java.util.*;
 
 public class DuelingPlugin extends JavaPlugin implements Listener {
     public Map<String, Arena> arenas = new HashMap<String, Arena>();
-    public static Map<String,String> queue = new HashMap<String, String>();
-
+    public Map<String,String> queue = new HashMap<String, String>();
+    public Map<String,Vault> vaults = new HashMap<String, Vault>();
+    public ItemStack a,b,c,d,e;
+    public Inventory inv;
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new Vaults(),this);
 
         // Make sure not to load configs until all worlds are loaded
         Bukkit.getScheduler().runTaskLater(this, new Runnable() {
@@ -43,7 +47,193 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
             }
         }, 2);
     }
+    public ItemStack create(Material material, String lore, String name){
+        ItemStack is = new ItemStack(material);
+        ItemMeta ism = is.getItemMeta();
+        ism.setDisplayName(name);
+        ism.setLore(Arrays.asList(lore));
+        is.setItemMeta(ism);
+        return is;
+    }
+    public void openInv(final Player p){
+        inv = Bukkit.createInventory(null,18,"Banker");
+        if (getConfig().getConfigurationSection(p.getName()) != null) {
+            ConfigurationSection config = getConfig().getConfigurationSection(p.getName());
+            switch (Upgrade.valueOf(config.getString("upgrade"))) {
+                case FIRST:
+                    a = create(Material.GOLD_ORE, "Acquired", "Upgrade I");
+                    b = create(Material.GOLD_ORE, "Purchasable", "Upgrade II");
+                    c = create(Material.GOLD_ORE, "Not Available", "Upgrade III");
+                    d = create(Material.GOLD_ORE, "Not Available", "Upgrade IV");
+                    e = create(Material.GOLD_ORE, "Not Available", "Upgrade V");
 
+                    break;
+                case SECOND:
+                    a = create(Material.GOLD_ORE, "Acquired", "Upgrade I");
+                    b = create(Material.GOLD_ORE, "Acquired", "Upgrade II");
+                    c = create(Material.GOLD_ORE,  "Purchasable", "Upgrade III");
+                    d = create(Material.GOLD_ORE, "Not Available", "Upgrade IV");
+                    e = create(Material.GOLD_ORE, "Not Available", "Upgrade V");
+
+                    break;
+                case THIRD:
+                    a = create(Material.GOLD_ORE,  "Acquired", "Upgrade I");
+                    b = create(Material.GOLD_ORE,  "Acquired", "Upgrade II");
+                    c = create(Material.GOLD_ORE,  "Acquired", "Upgrade III");
+                    d = create(Material.GOLD_ORE,   "Purchasable", "Upgrade IV");
+                    e = create(Material.GOLD_ORE,  "Not Available", "Upgrade V");
+
+                    break;
+                case FOURTH:
+                    a = create(Material.GOLD_ORE,  "Acquired", "Upgrade I");
+                    b = create(Material.GOLD_ORE,  "Acquired", "Upgrade II");
+                    c = create(Material.GOLD_ORE,  "Acquired", "Upgrade III");
+                    d = create(Material.GOLD_ORE,  "Acquired", "Upgrade IV");
+                    e = create(Material.GOLD_ORE, "Purchasable", "Upgrade V");
+
+                    break;
+                case FIFTH:
+                    a = create(Material.GOLD_ORE,  "Not Available", "Upgrade I");
+                    b = create(Material.GOLD_ORE,  "Not Available", "Upgrade II");
+                    c = create(Material.GOLD_ORE,  "Not Available", "Upgrade III");
+                    d = create(Material.GOLD_ORE,  "Not Available", "Upgrade IV");
+                    e = create(Material.GOLD_ORE,  "Not Available", "Upgrade V");
+
+                    break;
+                case NONE:
+                    a = create(Material.GOLD_ORE,   "Purchasable", "Upgrade I");
+                    b = create(Material.GOLD_ORE,  "Not Available", "Upgrade II");
+                    c = create(Material.GOLD_ORE,  "Not Available", "Upgrade III");
+                    d = create(Material.GOLD_ORE,  "Not Available", "Upgrade IV");
+                    e = create(Material.GOLD_ORE,  "Not Available", "Upgrade V");
+                    break;
+            }
+        }else{
+            a = create(Material.GOLD_ORE,   "Purchasable", "Upgrade I");
+            b = create(Material.GOLD_ORE,  "Not Available", "Upgrade II");
+            c = create(Material.GOLD_ORE,  "Not Available", "Upgrade III");
+            d = create(Material.GOLD_ORE,  "Not Available", "Upgrade IV");
+            e = create(Material.GOLD_ORE,  "Not Available", "Upgrade V");
+        }
+        inv.setItem(1,a);
+        inv.setItem(2,b);
+        inv.setItem(3,c);
+        inv.setItem(4,d);
+        inv.setItem(5,e);
+        Bukkit.getServer().getScheduler().runTaskLater(this,new Runnable() {
+            @Override
+            public void run() {
+              p.openInventory(inv);
+            }
+        },20);
+
+
+
+    }
+     @EventHandler
+    public void onPlayerClick(InventoryClickEvent e) {
+        if (e.getInventory().getName().contains("Banker")) {
+
+            ItemStack itemStack = e.getCurrentItem();
+            Player p = ((Player) e.getWhoClicked());
+
+            if (itemStack.getItemMeta().getDisplayName().contains("Upgrade")) {
+                if (itemStack.getItemMeta().getLore().contains("Purchasable")) {
+                    if (itemStack.getItemMeta().getDisplayName().contains("I")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Inventory inv = Bukkit.createInventory(null,27,p.getName() + "'s Vault 1");
+                        Vault vault = new Vault(this,"FIRST",inv);
+                        p.sendMessage(ChatColor.GREEN + "Purchase successful!");
+                        this.vaults.put(p.getName() + ".1", vault);
+                        ConfigurationSection vaultConfig = getConfig().createSection(p.getName() + ".1");
+                        vault.save(vaultConfig);
+                        saveConfig();reloadConfig();
+
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("II")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        p.sendMessage(ChatColor.GREEN + "Purchase successful!");
+                        Inventory inv = Bukkit.createInventory(null,27,p.getName() + "'s Vault 2");
+                        Vault vault = new Vault(this,"SECOND",inv);
+                        this.vaults.put(p.getName() + ".2", vault);
+                        ConfigurationSection vaultConfig = getConfig().createSection(p.getName() + ".2");
+                        vault.save(vaultConfig);
+                        saveConfig();reloadConfig();
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("III")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        p.sendMessage(ChatColor.GREEN + "Purchase successful!");
+                        Inventory inv = Bukkit.createInventory(null,27,p.getName() + "'s Vault 3");
+                        Vault vault = new Vault(this,"THIRD",inv);
+                        this.vaults.put(p.getName() + ".3", vault);
+                        ConfigurationSection vaultConfig = getConfig().createSection(p.getName() + ".3");
+                        vault.save(vaultConfig);
+                        saveConfig();reloadConfig();
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("IV")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        p.sendMessage(ChatColor.GREEN + "Purchase successful!");
+                        Inventory inv = Bukkit.createInventory(null,27,p.getName() + "'s Vault 4");
+                        Vault vault = new Vault(this,"FOURTH",inv);
+                        this.vaults.put(p.getName() + ".4", vault);
+                        ConfigurationSection vaultConfig = getConfig().createSection(p.getName() + ".4");
+                        vault.save(vaultConfig);
+                        saveConfig();reloadConfig();
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("V")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        p.sendMessage(ChatColor.GREEN + "Purchase successful!");
+                        Inventory inv = Bukkit.createInventory(null,27,p.getName() + "'s Vault 5");
+                        Vault vault = new Vault(this,"FIFTH",inv);
+                        this.vaults.put(p.getName() + ".5", vault);
+                        ConfigurationSection vaultConfig = getConfig().createSection(p.getName() + ".5");
+                        vault.save(vaultConfig);
+                        saveConfig();reloadConfig();
+                    }else{
+                        e.setCancelled(true);
+                        p.sendMessage(ChatColor.RED + "Error!");
+                    }
+                }else if (itemStack.getItemMeta().getLore().contains("Acquired")){
+                    if (itemStack.getItemMeta().getDisplayName().contains("I")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Vault vault = this.vaults.get(p.getName() + ".1");
+                        vault.enterVault(p);
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("II")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Vault vault = this.vaults.get(p.getName() + ".2");
+                        vault.enterVault(p);
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("III")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Vault vault = this.vaults.get(p.getName() + ".3");
+                        vault.enterVault(p);
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("IV")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Vault vault = this.vaults.get(p.getName() + ".4");
+                        vault.enterVault(p);
+                    } else if (itemStack.getItemMeta().getDisplayName().contains("V")) {
+                        e.setCancelled(true);
+                        p.closeInventory();
+                        Vault vault = this.vaults.get(p.getName() + ".5");
+                        vault.enterVault(p);
+                    }else{
+                        e.setCancelled(true);
+                        p.sendMessage(ChatColor.RED + "Error!");
+                    }
+                }else{
+                    e.setCancelled(true);
+                    p.sendMessage(ChatColor.RED + "This upgrade is not purchasable right now!");
+                }
+            }else{
+                e.setCancelled(true);
+                p.sendMessage(ChatColor.RED + "Error!");
+            }
+        }
+    }
     public void save() {
         Configuration configuration = getConfig();
         Collection<String> oldKeys = configuration.getKeys(false);
@@ -154,6 +344,21 @@ public class DuelingPlugin extends JavaPlugin implements Listener {
                 player.setMetadata("respawnLocation", new FixedMetadataValue(this, specroom));
                 player.sendMessage(ChatColor.AQUA + "You have lost :( Better luck next time!");
                 checkArena(arena);
+            }
+        }
+    }
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEntityEvent e){
+        if (e.getRightClicked() instanceof Villager){
+            Random random = new Random();
+            int n = random.nextInt(Villager.Profession.values().length);
+            if (((Villager) e.getRightClicked()).getCustomName().contains("Mr. Banker")){
+                List<Villager.Profession> list = new ArrayList<Villager.Profession>();
+                for (Villager.Profession s : Villager.Profession.values()){
+                    list.add(s);
+                }
+                ((Villager) e.getRightClicked()).setProfession(list.get(n));
+                openInv(e.getPlayer());
             }
         }
     }
